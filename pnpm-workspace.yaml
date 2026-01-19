@@ -1,0 +1,10 @@
+packages:
+  - "apps/*"
+  - "services/*"
+  - "packages/*"
+
+# Allow native builds for Prisma
+onlyBuiltDependencies:
+  - "@prisma/engines"
+  - "@prisma/client"
+  - "prisma"

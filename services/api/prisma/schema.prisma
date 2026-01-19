@@ -1,0 +1,216 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  STAFF
+}
+
+enum AssetType {
+  IMAGE
+  VIDEO
+}
+
+enum LayoutPreset {
+  SPLIT2
+  SPLIT3_CALL_1450x1080
+  FULLSCREEN
+}
+
+enum DeploymentTargetType {
+  STORE_ALL
+  DEVICE
+}
+
+enum CallAction {
+  CALL
+  RECALL
+  RESET
+}
+
+model Store {
+  id   String @id
+  name String
+
+  callEnabled  Boolean @default(true)
+  callListSize Int     @default(6)
+  callStartNo  Int     @default(1)
+  callNextNo   Int     @default(1)
+
+  layoutPreset LayoutPreset @default(SPLIT2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users             User[]
+  devices           Device[]
+  registrationCodes DeviceRegistrationCode[]
+  assets            Asset[]
+  playlists         Playlist[]
+  deployments       Deployment[]
+  calls             CallEvent[]
+
+  currentDeployment StoreCurrentDeployment?
+}
+
+model User {
+  id      String @id
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+
+  refreshTokens RefreshToken[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RefreshToken {
+  id     String @id
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tokenHash String
+  revokedAt DateTime?
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Device {
+  id      String @id
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name          String
+  screenProfile String
+
+  tokenHash  String
+  lastSeenAt DateTime?
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deployments Deployment[]
+}
+
+model DeviceRegistrationCode {
+  id      String @id
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  code      String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([storeId])
+}
+
+model Asset {
+  id      String @id
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  type        AssetType
+  url         String
+  filename    String
+  size        Int
+  durationSec Int?
+
+  createdAt DateTime @default(now())
+
+  playlistItems PlaylistItem[]
+}
+
+model Playlist {
+  id      String @id
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items       PlaylistItem[]
+  deployments Deployment[]
+}
+
+model PlaylistItem {
+  id         String   @id
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  sortOrder   Int
+  durationSec Int?
+
+  createdAt DateTime @default(now())
+
+  @@unique([playlistId, sortOrder])
+  @@index([playlistId])
+}
+
+model Deployment {
+  id      String @id
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  version Int
+
+  targetType     DeploymentTargetType
+  targetDeviceId String?
+  targetDevice   Device?              @relation(fields: [targetDeviceId], references: [id], onDelete: Cascade)
+
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Restrict)
+
+  layoutPreset LayoutPreset
+
+  createdAt DateTime @default(now())
+
+  storeCurrent StoreCurrentDeployment?
+
+  @@unique([storeId, version])
+  @@index([storeId, createdAt])
+}
+
+model StoreCurrentDeployment {
+  storeId String @id
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  deploymentId String     @unique
+  deployment   Deployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+
+  version Int
+
+  updatedAt DateTime @updatedAt
+}
+
+model CallEvent {
+  id      String @id
+  storeId String
+  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  action CallAction
+  number Int
+  ts     DateTime   @default(now())
+
+  createdAt DateTime @default(now())
+
+  @@index([storeId, ts])
+}

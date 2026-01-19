@@ -1,0 +1,26 @@
+{
+  "name": "menucast",
+  "private": true,
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,admin,counter,player -c blue,green,yellow,magenta \"pnpm -C services/api dev\" \"pnpm -C apps/admin-web dev\" \"pnpm -C apps/counter-web dev\" \"pnpm -C apps/player-web dev\"",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "db:push": "pnpm -C services/api prisma db push",
+    "prisma:generate": "pnpm -C services/api prisma generate",
+    "seed": "pnpm -C services/api seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "esbuild"
+    ]
+  }
+}

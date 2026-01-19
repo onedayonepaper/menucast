@@ -10,5 +10,9 @@ node_modules
 /data/menucast.db-*
 /data/uploads
 
+# accidental artifacts
+/services/api/dist
+/services/data
+
 # logs
 *.log

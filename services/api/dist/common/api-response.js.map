@@ -1,1 +1,0 @@
-{"version":3,"file":"api-response.js","sourceRoot":"","sources":["../../src/common/api-response.ts"],"names":[],"mappings":";;AAYA,gBAEC;AAED,kBAEC;AAND,SAAgB,EAAE,CAAI,IAAO;IAC3B,OAAO,EAAE,EAAE,EAAE,IAAI,EAAE,IAAI,EAAE,CAAC;AAC5B,CAAC;AAED,SAAgB,GAAG,CAAC,IAAkB,EAAE,OAAe;IACrD,OAAO,EAAE,EAAE,EAAE,KAAK,EAAE,KAAK,EAAE,EAAE,IAAI,EAAE,OAAO,EAAE,EAAE,CAAC;AACjD,CAAC"}
